@@ -1,83 +1,159 @@
+//package com.octopus.orm.api.vi.pojo;
+//
+//import com.octopus.orm.api.vi.pojo.CountryServiceImpl;
+//
+//import java.io.IOException;
+//import java.io.OutputStream;
+//import java.io.InputStreamReader;
+//import java.net.InetSocketAddress;
+//
+//import com.sun.net.httpserver.HttpServer;
+//import com.sun.net.httpserver.HttpHandler;
+//import com.sun.net.httpserver.HttpExchange;
+//import com.google.gson.Gson;
+//
+//public class Main {
+//    public static void main(String[] args) throws IOException {
+//        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+//        server.createContext("/api/1.0/country/add", new AddCountryHandler());
+//        server.createContext("/api/1.0/country/edit", new EditCountryHandler());
+//        server.createContext("/api/1.0/country/name", new GetCountryByNameHandler());
+//        server.createContext("/api/1.0/country/code", new GetCountryByCodeHandler());
+//        server.setExecutor(null); // creates a default executor
+//        server.start();
+//        System.out.println("Server started on port 8000");
+//    }
+//}
+//
+//abstract class BaseHandler implements HttpHandler {
+//    protected final CountryServiceImpl countryService = new CountryServiceImpl();
+//    protected final Gson gson = new Gson();
+//
+//    protected ApiV1Country parseRequest(HttpExchange exchange) throws IOException {
+//        return gson.fromJson(new InputStreamReader(exchange.getRequestBody()), ApiV1Country.class);
+//    }
+//
+//    protected void sendResponse(HttpExchange exchange, int responseCode, String response) throws IOException {
+//        exchange.sendResponseHeaders(responseCode, response.length());
+//        OutputStream os = exchange.getResponseBody();
+//        os.write(response.getBytes());
+//        os.close();
+//    }
+//}
+//
+//class AddCountryHandler extends BaseHandler {
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        ApiV1Country country = parseRequest(exchange);
+//        String response = countryService.addCountryRecord(country).toString();
+//        sendResponse(exchange, 200, response);
+//    }
+//}
+//
+//class EditCountryHandler extends BaseHandler {
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        ApiV1Country country = parseRequest(exchange);
+//        String response = countryService.editCountryRecord(country).toString();
+//        sendResponse(exchange, 200, response);
+//    }
+//}
+//
+//class GetCountryByNameHandler extends BaseHandler {
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        String name = exchange.getRequestURI().getQuery().split("=")[1];
+//        String response = countryService.getCountryByName(name).toString();
+//        sendResponse(exchange, 200, response);
+//    }
+//}
+//
+//class GetCountryByCodeHandler extends BaseHandler {
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        String code = exchange.getRequestURI().getQuery().split("=")[1];
+//        String response = countryService.getCountryByCode(code).toString();
+//        sendResponse(exchange, 200, response);
+//    }
+//}
+//
+//
+
+
 package com.octopus.orm.api.vi.pojo;
 
-import com.octopus.orm.api.vi.pojo.CountryServiceImpl;
-
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
 import com.google.gson.Gson;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 public class Main {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-        server.createContext("/api/1.0/country", new CountryHandler());
+        server.createContext("/api/1.0/country/add", new AddCountryHandler());
+        server.createContext("/api/1.0/country/edit", new EditCountryHandler());
+        server.createContext("/api/1.0/country/name", new GetCountryByNameHandler());
+        server.createContext("/api/1.0/country/code", new GetCountryByCodeHandler());
         server.setExecutor(null); // creates a default executor
         server.start();
         System.out.println("Server started on port 8000");
     }
+}
 
-    // The CountryHandler class that interfaces with the CountryServiceImpl
-    static class CountryHandler implements HttpHandler {
-        private final CountryServiceImpl countryService;
-        private final Gson gson;
+abstract class BaseHandler implements HttpHandler {
+    protected final CountryServiceImpl countryService = new CountryServiceImpl();
+    protected final Gson gson = new Gson();
 
-        public CountryHandler() {
-            this.countryService = new CountryServiceImpl(); // Initialize the service implementation
-            this.gson = new Gson(); // Initialize Gson for JSON processing
-        }
+    protected ApiV1Country parseRequest(HttpExchange exchange) throws IOException {
+        return gson.fromJson(new InputStreamReader(exchange.getRequestBody()), ApiV1Country.class);
+    }
 
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String response;
-            int responseCode = 200;
-
-            switch (exchange.getRequestMethod()) {
-                case "POST":
-                    if (exchange.getRequestURI().getPath().endsWith("/addCountry")) {
-                        // Handle adding a country
-                        ApiV1Country country = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), ApiV1Country.class);
-                        response = countryService.addCountryRecord(country).toString();
-                    } else if (exchange.getRequestURI().getPath().endsWith("/editCountry")) {
-                        // Handle editing a country
-                        ApiV1Country country = gson.fromJson(new InputStreamReader(exchange.getRequestBody()), ApiV1Country.class);
-                        response = countryService.editCountryRecord(country).toString();
-                    } else {
-                        responseCode = 400; // Bad Request
-                        response = "Invalid POST request";
-                    }
-                    break;
-
-                case "GET":
-                    if (exchange.getRequestURI().getPath().endsWith("/countryName")) {
-                        // Handle getting a country by name
-                        String name = exchange.getRequestURI().getQuery().split("=")[1];
-                        response = countryService.getCountryByName(name).toString();
-                    } else if (exchange.getRequestURI().getPath().endsWith("/countryCode")) {
-                        // Handle getting a country by code
-                        String code = exchange.getRequestURI().getQuery().split("=")[1];
-                        response = countryService.getCountryByCode(code).toString();
-                    } else {
-                        responseCode = 400; // Bad Request
-                        response = "Invalid GET request";
-                    }
-                    break;
-
-                default:
-                    responseCode = 405; // Method Not Allowed
-                    response = "Unsupported request method";
-                    break;
-            }
-
-            // Send the response
-            exchange.sendResponseHeaders(responseCode, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
+    protected void sendResponse(HttpExchange exchange, int responseCode, String response) throws IOException {
+        exchange.sendResponseHeaders(responseCode, response.length());
+        OutputStream os = exchange.getResponseBody();
+        os.write(response.getBytes());
+        os.close();
     }
 }
+
+class AddCountryHandler extends BaseHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        ApiV1Country country = parseRequest(exchange);
+        String response = countryService.addCountryRecord(country).toString();
+        sendResponse(exchange, 200, response);
+    }
+}
+
+class EditCountryHandler extends BaseHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        ApiV1Country country = parseRequest(exchange);
+        String response = countryService.editCountryRecord(country).toString();
+        sendResponse(exchange, 200, response);
+    }
+}
+
+class GetCountryByNameHandler extends BaseHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        String name = exchange.getRequestURI().getQuery().split("=")[1];
+        String response = countryService.getCountryByName(name).toString();
+        sendResponse(exchange, 200, response);
+    }
+}
+
+class GetCountryByCodeHandler extends BaseHandler {
+    @Override
+    public void handle(HttpExchange exchange) throws IOException {
+        String code = exchange.getRequestURI().getQuery().split("=")[1];
+        String response = countryService.getCountryByCode(code).toString();
+        sendResponse(exchange, 200, response);
+    }
+}
+

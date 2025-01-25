@@ -1,3 +1,95 @@
+//package com.octopus.orm.api.vi.pojo;
+//
+//import com.octopus.orm.api.vi.service.impl.CountryDAO;
+//import com.octopus.orm.api.vi.service.impl.OctopusDAOException;
+//
+//import javax.ws.rs.core.Response;
+//import java.util.ArrayList;
+//
+//public class CountryServiceImpl {
+//    private final CountryDAO countryDAO;
+//
+//    public CountryServiceImpl() {
+//        this.countryDAO = CountryDAO.getInstance();
+//    }
+//
+//    public Response addCountryRecord(ApiV1Country data) {
+//        try {
+//            ApiV1Country result = countryDAO.addCountry(data);
+//            if (result != null) {
+//                return Response.status(Response.Status.OK).entity(result).build();
+//            } else {
+//                throw new OctopusDAOException("Error occurred while saving the country");
+//            }
+//        } catch (OctopusDAOException e) {
+//            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+//        } catch (Exception e) {
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An unexpected error occurred").build();
+//        }
+//    }
+//
+//    public Response editCountryRecord(ApiV1Country data) {
+//        try {
+//            ApiV1Country result = countryDAO.updateCountry(data);
+//            if (result != null) {
+//                return Response.status(Response.Status.OK).entity(result).build();
+//            } else {
+//                throw new OctopusDAOException("Error occurred while updating the country");
+//            }
+//        } catch (OctopusDAOException e) {
+//            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+//        } catch (Exception e) {
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An unexpected error occurred").build();
+//        }
+//    }
+//
+//    public Response getCountryByName(String name) {
+//        try {
+//            ApiV1Country result = countryDAO.getCountryByName(name);
+//            if (result != null) {
+//                return Response.status(Response.Status.OK).entity(result).build();
+//            } else {
+//                throw new OctopusDAOException("Country not found");
+//            }
+//        } catch (OctopusDAOException e) {
+//            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+//        } catch (Exception e) {
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An unexpected error occurred").build();
+//        }
+//    }
+//
+//    public Response getCountryByCode(String code) {
+//        try {
+//            ApiV1Country result = countryDAO.getCountryByCode(code);
+//            if (result != null) {
+//                return Response.status(Response.Status.OK).entity(result).build();
+//            } else {
+//                throw new OctopusDAOException("Country not found");
+//            }
+//        } catch (OctopusDAOException e) {
+//            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+//        } catch (Exception e) {
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An unexpected error occurred").build();
+//        }
+//    }
+//
+//    public Response getAllCountryRecords() {
+//        try {
+//            ArrayList<ApiV1Country> result = countryDAO.getAllCountries();
+//            if (result != null && !result.isEmpty()) {
+//                return Response.status(Response.Status.OK).entity(result).build();
+//            } else {
+//                throw new OctopusDAOException("Country list is empty");
+//            }
+//        } catch (OctopusDAOException e) {
+//            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+//        } catch (Exception e) {
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An unexpected error occurred").build();
+//        }
+//    }
+//}
+
+
 package com.octopus.orm.api.vi.pojo;
 
 import java.util.ArrayList;
