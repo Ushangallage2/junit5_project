@@ -9,7 +9,6 @@ import javax.ws.rs.core.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.octopus.orm.api.vi.pojo.ApiSharedMethods;
 import com.octopus.orm.api.vi.service.impl.CountryDataManager;
 import com.octopus.orm.api.vi.service.impl.OctopusDAOException;
 
@@ -34,7 +33,12 @@ public class CountryServiceImpl {
     HttpHeaders headers;
 
     private final Gson gson = new GsonBuilder().create();
-    private final CountryDataManager countryDataManager = new CountryDataManager();
+    private final CountryDataManager countryDataManager; // No initialization here
+
+    // Constructor for dependency injection
+    public CountryServiceImpl(CountryDataManager countryDataManager) {
+        this.countryDataManager = countryDataManager != null ? countryDataManager : new CountryDataManager();
+    }
 
     @POST
     @Path("/addCountry")
@@ -58,8 +62,6 @@ public class CountryServiceImpl {
                     .build();
         }
     }
-
-
 
     @POST
     @Path("/list")

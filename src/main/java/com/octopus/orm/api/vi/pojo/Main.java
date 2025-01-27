@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
+import com.octopus.orm.api.vi.service.impl.CountryDataManager;
 import com.octopus.orm.api.vi.service.impl.OctopusDAOException;
 import com.sun.net.httpserver.HttpServer;
 import com.google.gson.Gson;
@@ -17,11 +18,12 @@ import javax.ws.rs.core.Response;
 public class Main {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-        server.createContext("/api/1.0/country/addCountry", new AddCountryHandler());
-        server.createContext("/api/1.0/country/editCountry", new EditCountryHandler());
-        server.createContext("/api/1.0/country/countryName", new GetCountryByNameHandler());
-        server.createContext("/api/1.0/country/countryCode", new GetCountryByCodeHandler());
-        server.createContext("/api/1.0/country/list", new GetAllCountriesHandler());
+        CountryDataManager countryDataManager = new CountryDataManager(); // Create CountryDataManager instance
+        server.createContext("/api/1.0/country/addCountry", new AddCountryHandler(countryDataManager));
+        server.createContext("/api/1.0/country/editCountry", new EditCountryHandler(countryDataManager));
+        server.createContext("/api/1.0/country/countryName", new GetCountryByNameHandler(countryDataManager));
+        server.createContext("/api/1.0/country/countryCode", new GetCountryByCodeHandler(countryDataManager));
+        server.createContext("/api/1.0/country/list", new GetAllCountriesHandler(countryDataManager));
         server.setExecutor(null); // creates a default executor
         server.start();
         System.out.println("Server started on port 8000");
@@ -29,11 +31,14 @@ public class Main {
 }
 
 abstract class BaseHandler implements HttpHandler {
-    protected final CountryServiceImpl countryService = new CountryServiceImpl();
+    protected final CountryServiceImpl countryService;
     protected final Gson gson = new Gson();
-
     protected static final String SUCCESS_STATUS = "success";
     protected static final String FAILURE_STATUS = "failure";
+
+    protected BaseHandler(CountryDataManager countryDataManager) {
+        this.countryService = new CountryServiceImpl(countryDataManager);
+    }
 
     protected ApiV1Country parseRequest(HttpExchange exchange) throws IOException {
         return gson.fromJson(new InputStreamReader(exchange.getRequestBody()), ApiV1Country.class);
@@ -51,11 +56,16 @@ abstract class BaseHandler implements HttpHandler {
         exchange.sendResponseHeaders(responseCode, response.length());
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes());
-        } // Automatically close OutputStream
+        }
     }
 }
 
+
 class AddCountryHandler extends BaseHandler {
+
+    public AddCountryHandler(CountryDataManager countryDataManager) {
+        super(countryDataManager); }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
@@ -72,20 +82,9 @@ class AddCountryHandler extends BaseHandler {
 }
 
 
-//class EditCountryHandler extends BaseHandler {
-//    @Override
-//    public void handle(HttpExchange exchange) throws IOException {
-//        try {
-//            ApiV1Country country = parseRequest(exchange);
-//            String response = countryService.editCountryRecord(country).toString();
-//            sendResponse(exchange, 200, createResponse(SUCCESS_STATUS, "Country edited successfully", response));
-//        } catch (Exception e) {
-//            sendResponse(exchange, 500, createResponse(FAILURE_STATUS, "Failed to edit country: " + e.getMessage(), null));
-//        }
-//    }
-//}
-
 class EditCountryHandler extends BaseHandler {
+    public EditCountryHandler(CountryDataManager countryDataManager) {
+        super(countryDataManager); }
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
@@ -106,6 +105,11 @@ class EditCountryHandler extends BaseHandler {
 
 
 class GetCountryByCodeHandler extends BaseHandler {
+
+    public GetCountryByCodeHandler(CountryDataManager countryDataManager) {
+        super(countryDataManager); }
+
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String code = exchange.getRequestURI().getQuery().split("=")[1];
@@ -122,6 +126,10 @@ class GetCountryByCodeHandler extends BaseHandler {
 }
 
 class GetCountryByNameHandler extends BaseHandler {
+
+    public GetCountryByNameHandler(CountryDataManager countryDataManager) {
+        super(countryDataManager); }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String name = exchange.getRequestURI().getQuery().split("=")[1];
@@ -139,6 +147,10 @@ class GetCountryByNameHandler extends BaseHandler {
 
 // Assuming GetAllCountriesHandler remains the same as previously provided.
 class GetAllCountriesHandler extends BaseHandler {
+
+    public GetAllCountriesHandler(CountryDataManager countryDataManager) {
+        super(countryDataManager); }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         try {
@@ -151,3 +163,17 @@ class GetAllCountriesHandler extends BaseHandler {
         }
     }
 }
+
+
+//class EditCountryHandler extends BaseHandler {
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        try {
+//            ApiV1Country country = parseRequest(exchange);
+//            String response = countryService.editCountryRecord(country).toString();
+//            sendResponse(exchange, 200, createResponse(SUCCESS_STATUS, "Country edited successfully", response));
+//        } catch (Exception e) {
+//            sendResponse(exchange, 500, createResponse(FAILURE_STATUS, "Failed to edit country: " + e.getMessage(), null));
+//        }
+//    }
+//}
